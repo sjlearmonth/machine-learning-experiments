@@ -1,54 +1,51 @@
 import numpy as np
 import timeit
+import tensorflow as tf
+import sys
 
-trad_w = np.random.randn(1000, 1000)
-trad_x = np.random.randn(1000, 1000)
-trad_b = np.random.rand(1000, 1)
+print(f"Numpy version: {np.__version__}")
+print(f"TensorFlow version: {tf.__version__}")
+print(f"Python version: {sys.version}\n")
+print("Author: Stephen J Learmonth.")
+print("Date: 11th December 2025.\n")
 
-def compute_z_trad():
+rows = cols = 1000
 
-    global trad_w, trad_x, trad_b
+trad_w = (np.random.random(size=(rows, cols)) - 0.5) * 20
+trad_x = (np.random.random(size=(rows, cols)) - 0.5) * 20
+trad_b = (np.random.random(size=(rows, 1)) - 0.5) * 20
 
-    trad_z = np.dot(trad_w, trad_x) + trad_b
+elapsed_times_trad = timeit.repeat(stmt="trad_z = np.dot(trad_w, trad_x) + trad_b",
+                                   setup="import numpy as np",
+                                   repeat=6,
+                                   number=1000,
+                                   globals=globals())
 
-trad_times = timeit.repeat(stmt='compute_z_trad()',
-              setup="import numpy as np",
-              repeat=6,
-              number=1000,
-              globals=globals())
+min_elapsed_time_trad = min(elapsed_times_trad)
 
-print("----------- Traditional Computation of z = w*x + b ----------\n")
-print(f"Trad z: Least elapsed execution time: {np.round((min(trad_times) / 1000)*1e6, 2)}usecs.\n")
+print("----------- Traditional Computation of z = w * x + b --------\n")
+print("                    w.shape = (1000, 1000)                   ")
+print("                    x.shape = (1000, 1000)                   ")
+print("                    b.shape = (1000, 1)                      \n")
 
-new_wb = np.random.randn(1000, 1000)
-new_x = np.random.randn(1000, 1000)
+print(f"Traditional computation of z: Min elapsed execution time: {np.round((min_elapsed_time_trad / 1000)*1e3, 2)} msecs.\n")
 
-def set_last_row_of_x():
+alt_wb = np.append(trad_w, (np.random.random(size=(rows, 1)) - 0.5) * 20, axis=1)
+alt_x1s = np.append(trad_x, np.ones((1, cols)), axis=0)
 
-    new_x[-1, :] = 1
+elapsed_times_alt = timeit.repeat(stmt="alt_z = np.dot(alt_wb, alt_x1s)",
+                                  setup="import numpy as np",
+                                  repeat=6,
+                                  number=1000,
+                                  globals=globals())
 
-    return
+min_elapsed_time_alt = min(elapsed_times_alt)
 
-new_slrox_times = timeit.repeat(stmt='set_last_row_of_x()',
-              setup="import numpy as np",
-              repeat=6,
-              number=1000,
-              globals=globals())
+performance_increase_pcnt = ((min_elapsed_time_trad - min_elapsed_time_alt) / min_elapsed_time_trad) * 100
 
-print("----------- Set last row of x to 1 ----------\n")
-print(f"Set last row of x to 1: Least elapsed execution time: {np.round((min(new_slrox_times) / 1000)*1e9, 2)}nsecs.\n")
+print("---------------- Alternate Computation of z = wb * x1s --------------\n")
+print("                    wb.shape = (1000, 1001)                        ")
+print("                    x1s.shape = (1001, 1000)                       \n")
 
-def compute_z_new():
-
-    global new_wb, new_x
-
-    new_z = np.dot(new_wb, new_x)
-
-new_times = timeit.repeat(stmt='compute_z_new()',
-              setup="import numpy as np",
-              repeat=6,
-              number=1000,
-              globals=globals())
-
-print("----------- New Computation of z = wb*x ----------\n")
-print(f"Set last row of x to 1: Least elapsed execution time: {np.round((min(new_times) / 1000)*1e6, 2)}usecs.\n")
+print(f"Alternate computation of z: Min elapsed execution time: {np.round((min_elapsed_time_alt / 1000)*1e3, 2)} msecs.\n")
+print(f"Performance increase: {performance_increase_pcnt:.2f}%.\n")
