@@ -45,13 +45,16 @@ def get_min_exec_time(times, iters):
 
     return time_per_compute, units
 
-w_rows = 250; w_cols = 500_000
+
+# High w_rows means a large amount of Python broadcasting of b; High number of x_cols means
+# a large amount of multiplications and additions to form a single dot product result.
+w_rows = 100_000; w_cols = 50
 x_rows = w_cols; x_cols = w_rows
 b_rows = w_rows; b_cols = 1
 
 # cols = 500_000
-num_iters = 6
-num_rpts = 6
+num_iters = 10
+num_rpts = 10
 rand_offset = 0.5
 rand_range = 20
 
